@@ -1,0 +1,14 @@
+;; data/datascript-tx.edn — DataScript tx-data derived from src/association/facts.cljc
+;; `association.facts/catalog` (ADR-2607141700 Wave 0). Same shape as sibling files.
+
+[#:association-rule{:id "ciu.founding-1898-11-12"
+                     :title "Cámara de Industrias del Uruguay (CIU) founded 12 November 1898 (ciu.com.uy's own official page, independently corroborated by the Uruguayan Parliament's own library catalog pmb.parlamento.gub.uy)"
+                     :association "ciu"
+                     :isic "9411"
+                     :country "URY"
+                     :kind :governance-program
+                     :url "https://www.ciu.com.uy/propuesta-de-valor/que-es-la-ciu/"
+                     :url-provenance :official-ciu-com-uy
+                     :established-date "1898-11-12"
+                     :retrieved-at "2026-07-18"
+                     :topic [:governance]}]
