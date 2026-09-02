@@ -12,7 +12,8 @@
   by position, so the port chose the order the data file writes; the assertion
   below compares against that written order rather than against `seq` on a set,
   which is not stable to rely on."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [clojure.edn :as edn]
+            [clojure.test :refer [deftest is testing]]
             [association.facts :as facts]
             [kotoba.compiler.core :as compiler]
             [kotoba.kir :as ir]))
@@ -25,16 +26,27 @@
 (def ^:private slug "ciu")
 (def ^:private fields
   ["id" "title" "association" "isic" "country" "kind" "url" "url-provenance"
-   "established-date" "retrieved-at"])
+   "source-article" "source-quote" "established-date" "last-revised-date"
+   "date-unknown-because" "retrieved-at"])
 (def ^:private kw->field
   {"id" :association-rule/id "title" :association-rule/title
    "association" :association-rule/association "isic" :association-rule/isic
    "country" :association-rule/country "kind" :association-rule/kind
    "url" :association-rule/url "url-provenance" :association-rule/url-provenance
+   "source-article" :association-rule/source-article
+   "source-quote" :association-rule/source-quote
    "established-date" :association-rule/established-date
+   "last-revised-date" :association-rule/last-revised-date
+   "date-unknown-because" :association-rule/date-unknown-because
    "retrieved-at" :association-rule/retrieved-at})
 (def ^:private entries (vec (facts/spec-basis slug)))
-(def ^:private topic-order [["governance"]])
+(def ^:private topic-order
+  "The order the data file writes, read from the data file -- not a literal.
+  A literal here would have to be retyped every time the catalog grows, and
+  the failure mode of forgetting is that the suite checks fewer entries than
+  the catalog has while still reporting a pass."
+  (mapv #(mapv name (:association-rule/topic %))
+        (edn/read-string (slurp "data/datascript-tx.edn"))))
 
 (deftest the-fixture-reads-a-real-catalog
   ;; An empty catalog compares equal to an empty port.
@@ -64,11 +76,12 @@
         (is (= nm (present (call 'topic slug i t))))))))
 
 (deftest by-topic-answers-the-same-entries
-  (doseq [names topic-order t names]
+  (doseq [t (distinct (apply concat topic-order))]
     (testing t
       (let [cljc (mapv :association-rule/id (facts/by-topic slug (keyword t)))]
         (is (= (count cljc) (call 'by-topic-count slug t)))
-        (is (= (first cljc) (present (call 'by-topic-id slug t 0)))))))
+        (doseq [[i id] (map-indexed vector cljc)]
+          (is (= id (present (call 'by-topic-id slug t i))))))))
   (is (zero? (call 'by-topic-count slug "no-such-topic")))
   (is (nil? (present (call 'by-topic-id slug "no-such-topic" 0)))))
 
@@ -79,6 +92,25 @@
     (is (nil? (present (call 'entry-field other 0 "id"))))
     (is (nil? (present (call 'coverage-note other))))
     (is (nil? (facts/spec-basis other)) "and the cljc agrees")))
+
+(deftest an-index-past-the-end-is-covered-by-nothing
+  ;; The catalog grew from 1 entry to 31, and the port bakes that count into
+  ;; two places: `valid-entry?`, and the arms of the `entry-field` dispatch.
+  ;;
+  ;; What this test pins is the MODULE's behaviour -- nothing outside
+  ;; 0..n-1 answers -- and not either guard on its own. The two are
+  ;; redundant, so loosening one leaves the other refusing and this test
+  ;; still passes. Measured 2026-09-02 against the generated port: widening
+  ;; `valid-entry?` to `(< i 32)` alone, and making the dispatch's `:else`
+  ;; return entry 0 alone, both left the suite green; breaking BOTH failed
+  ;; here. Read it as defence-in-depth holding, not as a localiser -- a
+  ;; comment claiming it catches the off-by-one would be claiming a
+  ;; discrimination this assertion has been shown not to have.
+  (is (nil? (present (call 'entry-field slug (count entries) "id"))))
+  (is (nil? (present (call 'entry-field slug -1 "id"))))
+  (is (zero? (call 'topic-count slug (count entries))))
+  (is (some? (present (call 'entry-field slug (dec (count entries)) "id")))
+      "and the last real entry is still there"))
 
 (deftest the-module-compiles-for-every-target-it-claims
   (doseq [target [:js-kotoba-v1 :wasm32-kotoba-v1 :x86_64-kotoba-v1 :aarch64-kotoba-v1]]

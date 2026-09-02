@@ -1,13 +1,18 @@
 ;; schema/association-rule.edn — DataScript schema for `association.facts`
-;; (ADR-2607141700). Identical shape to the sibling
-;; cloud-itonami-assoc-9411-sau-fsc / -9411-aut-wko / -9411-irl-ibec /
-;; -9411-nzl-businessnz / -9411-cze-spcr / -9411-ind-cii / -9411-zaf-busa /
-;; -9411-bra-cni / -9411-ken-kam / -9411-can-chamber / -9411-mex-coparmex /
-;; -9411-ita-confindustria / -9411-nld-vnoncw / -9411-kor-kcci /
-;; -9411-arg-uia / -9411-bel-feb / -9411-dnk-di / -9411-swe-sn /
-;; -9411-fin-ek / -9411-tha-fti / -9411-chl-sofofa / -9411-col-andi /
-;; -9411-cri-uccaep / -9411-ecu-cip / -9411-egy-fei / -9411-pry-uip /
-;; ... files.
+;; (ADR-2607141700). Same shape as the sibling cloud-itonami-assoc-9411-*
+;; files, plus the three attributes this catalog needs to make its citations
+;; checkable rather than merely present:
+;;
+;;   :source-article        which article of the instrument the entry reads
+;;   :source-quote          the verbatim span the entry rests on, so that
+;;                          `nbb scripts/verify-catalog.cljs --live` can fetch
+;;                          the source and ask whether it still says it
+;;   :date-unknown-because  why the source gives neither an established nor a
+;;                          last-revised date. Present ONLY when both are
+;;                          absent; the verifier rejects an entry that carries
+;;                          it alongside a date, and rejects an entry that has
+;;                          neither a date nor this reason. A forgotten date
+;;                          and a recorded absence must not look the same.
 
 {:association-rule/id {:db/unique :db.unique/identity}
  :association-rule/title {}
@@ -17,7 +22,10 @@
  :association-rule/kind {:db/index true}
  :association-rule/url {}
  :association-rule/url-provenance {:db/index true}
+ :association-rule/source-article {}
+ :association-rule/source-quote {}
  :association-rule/established-date {}
  :association-rule/last-revised-date {}
+ :association-rule/date-unknown-because {:db/index true}
  :association-rule/retrieved-at {}
  :association-rule/topic {:db/cardinality :db.cardinality/many :db/index true}}
