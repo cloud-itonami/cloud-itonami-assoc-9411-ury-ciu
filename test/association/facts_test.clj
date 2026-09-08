@@ -1,6 +1,6 @@
 (ns association.facts-test
   (:require [clojure.edn :as edn]
-            [clojure.string :as str]
+            [kotoba.lang.text :as str]
             [clojure.test :refer [deftest is testing]]
             [association.facts :as facts]))
 
@@ -87,7 +87,7 @@
     (is (every? #(re-matches #"\d+" %) arts)
         "an Estatutos entry cites a numbered article")
     (doseq [e est]
-      (is (str/includes? (str/lower-case (:association-rule/title e))
+      (is (str/includes? (str/lower (:association-rule/title e))
                          (str "article " (:association-rule/source-article e)))
           "the title must name the article, so prose and citation cannot drift"))))
 
