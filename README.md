@@ -88,8 +88,8 @@ Every entry carries the article it comes from and the **verbatim span** it
 rests on:
 
 ```bash
-nbb scripts/verify-catalog.cljs          # structural only (offline)
-nbb scripts/verify-catalog.cljs --live   # fetch every :url, require every quote
+kbb --backend sci scripts/verify-catalog.cljk          # structural only (offline)
+kbb --backend sci scripts/verify-catalog.cljk --live   # fetch every :url, require every quote
 ```
 
 Exit is three-valued: `0` checked and clean, `1` findings printed, `2`
@@ -157,15 +157,15 @@ fabricate one.
   Do not hand-edit:
 
   ```bash
-  nbb scripts/gen-kotoba-port.cljs           # rewrite the port
-  nbb scripts/gen-kotoba-port.cljs --check   # exit 1 if someone hand-edited it
+  kbb --backend sci scripts/gen-kotoba-port.cljk           # rewrite the port
+  kbb --backend sci scripts/gen-kotoba-port.cljk --check   # exit 1 if someone hand-edited it
   ```
 
 - `schema/association-rule.edn` — DataScript schema. Query this alongside
   other `cloud-itonami`/`etzhayyim` compliance-fact sources via
   `com-junkawasaki/root`'s `scripts/compliance-fact-query.cljs`.
 
-`clojure -M:test` runs both suites: the catalog against the authored data
+`kbb -M:test` runs both suites: the catalog against the authored data
 file, and the Kotoba port against the catalog field by field, for all four
 targets the module claims.
 
