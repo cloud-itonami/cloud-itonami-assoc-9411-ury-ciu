@@ -26,7 +26,7 @@
 
   Provenance is checkable, not asserted. Every entry carries the article it
   comes from and the verbatim span it rests on, and
-  `nbb scripts/verify-catalog.cljs --live` fetches each :url and fails if the
+  `kbb --backend sci scripts/verify-catalog.cljk --live` fetches each :url and fails if the
   document no longer contains that span. Reachability alone would not do:
   a URL that returns 200 without the claim is indistinguishable from one that
   supports it, which is exactly how a citation rots without anyone noticing.
@@ -46,7 +46,7 @@
   `data/datascript-tx.edn` is the authored copy. This catalog and
   `src/association_facts.kotoba` are both readings of it, and both are held
   to it -- this one by test/association/facts_test.clj, the Kotoba port by
-  `nbb scripts/gen-kotoba-port.cljs --check`.
+  `kbb --backend sci scripts/gen-kotoba-port.cljk --check`.
 
   An association not in `catalog` has NO spec-basis, full stop; never
   fabricate one.")
